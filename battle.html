@@ -1,0 +1,811 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUEL RPG — Битва</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+        }
+
+        .battle-page {
+            position: relative;
+            z-index: 2;
+            width: min(1000px, 94%);
+            margin: 25px auto 35px;
+        }
+
+        .battle-heading {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .battle-heading h1 {
+            font-size: 27px;
+            letter-spacing: 3px;
+            margin: 8px 0;
+        }
+
+        .round-label {
+            color: #ff6565;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* Поле боя */
+
+        .battlefield {
+            position: relative;
+            height: clamp(290px, 48vw, 440px);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 12px;
+            background: rgba(0,0,0,.16);
+        }
+
+        .battle-ground {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(5,5,12,.04) 45%,
+                rgba(5,5,12,.35) 100%
+            );
+            pointer-events: none;
+        }
+
+        .battle-hud {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 88%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            z-index: 3;
+        }
+
+        .fighter-hud {
+            width: 42%;
+            max-width: 300px;
+        }
+
+        .fighter-hud.right {
+            text-align: right;
+        }
+
+        .fighter-name {
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 7px;
+            text-shadow: 0 2px 5px #000;
+        }
+
+        .hp-numbers {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px #000;
+        }
+
+        .hp-track {
+            height: 11px;
+            background: rgba(0,0,0,.8);
+            border: 1px solid rgba(255,255,255,.45);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .hp-fill {
+            width: 100%;
+            height: 100%;
+            background: #45e58a;
+            border-radius: 10px;
+            transition: width .3s ease, background .3s ease;
+        }
+
+        .fighter-hud.right .hp-fill {
+            margin-left: auto;
+        }
+
+        .fighter {
+            position: absolute;
+            bottom: 7%;
+            width: 34%;
+            height: 65%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 2;
+            transition: filter .15s;
+        }
+
+        .fighter.left {
+            left: 5%;
+        }
+
+        .fighter.right {
+            right: 5%;
+        }
+
+        .fighter img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center bottom;
+            filter: drop-shadow(0 8px 9px rgba(0,0,0,.55));
+        }
+
+        .fighter.hit {
+            filter: brightness(2) sepia(1) saturate(5);
+        }
+
+        .fighter.attack-left {
+            animation: attackLeft .35s ease;
+        }
+
+        .fighter.attack-right {
+            animation: attackRight .35s ease;
+        }
+
+        @keyframes attackLeft {
+            50% { transform: translateX(35px); }
+        }
+
+        @keyframes attackRight {
+            50% { transform: translateX(-35px); }
+        }
+
+        /* Снаряд */
+
+        .projectile {
+            position: absolute;
+            z-index: 5;
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            pointer-events: none;
+            display: none;
+            filter: drop-shadow(0 0 9px rgba(255,80,50,.8));
+        }
+
+        .projectile.fly {
+            display: block;
+            animation: projectileFly .42s linear forwards;
+        }
+
+        @keyframes projectileFly {
+            from {
+                left: var(--start-x);
+                top: var(--start-y);
+                transform: rotate(0deg) scale(.7);
+            }
+            to {
+                left: var(--end-x);
+                top: var(--end-y);
+                transform: rotate(360deg) scale(1.1);
+            }
+        }
+
+        .battle-vs {
+            position: absolute;
+            top: 49%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+            font-weight: 900;
+            color: rgba(255,255,255,.45);
+            text-shadow: 0 2px 10px #000;
+        }
+
+        .battle-message {
+            position: absolute;
+            left: 50%;
+            bottom: 12px;
+            transform: translateX(-50%);
+            width: 90%;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 2px 5px #000;
+            z-index: 6;
+        }
+
+        /* Панель действий */
+
+        .battle-panel {
+            margin-top: 15px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 10px;
+            background: rgba(13,13,21,.88);
+            backdrop-filter: blur(8px);
+        }
+
+        .turn-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .turn-heading h2 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .turn-badge {
+            color: #ff7777;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .action-card {
+            min-width: 0;
+            min-height: 112px;
+            padding: 13px 11px;
+            text-align: left;
+            color: white;
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .action-card:hover:not(:disabled) {
+            border-color: #ff4141;
+            background: rgba(255,65,65,.09);
+            transform: translateY(-2px);
+        }
+
+        .action-card:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .action-card strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .action-card p {
+            font-size: 11px;
+            line-height: 1.5;
+            opacity: .72;
+            margin: 0 0 10px;
+        }
+
+        .action-damage {
+            color: #ff7777;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .action-heal {
+            color: #65ef9b;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .action-limit {
+            color: #c6a5ff;
+            font-size: 10px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .battle-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .battle-status {
+            font-size: 12px;
+            line-height: 1.5;
+            opacity: .8;
+        }
+
+        .reset-btn {
+            padding: 10px 14px;
+            background: transparent;
+            color: white;
+            border: 1px solid #555565;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .reset-btn:hover {
+            border-color: #ff4141;
+        }
+
+        .back-home {
+            display: block;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            opacity: .7;
+        }
+
+        .back-home:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .battle-page {
+                margin-top: 15px;
+            }
+
+            .battle-heading h1 {
+                font-size: 22px;
+            }
+
+            .battlefield {
+                height: 330px;
+            }
+
+            .fighter {
+                width: 43%;
+                height: 57%;
+                bottom: 9%;
+            }
+
+            .fighter.left {
+                left: 0;
+            }
+
+            .fighter.right {
+                right: 0;
+            }
+
+            .battle-hud {
+                width: 92%;
+                top: 12px;
+                gap: 12px;
+            }
+
+            .fighter-name {
+                font-size: 12px;
+            }
+
+            .hp-track {
+                height: 9px;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-card {
+                min-height: 0;
+                padding: 12px;
+            }
+
+            .action-card p {
+                margin-bottom: 6px;
+            }
+
+            .battle-panel {
+                padding: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <header class="header">
+        <a class="logo" href="index.html">DUEL<span>RPG</span></a>
+        <nav>
+            <a href="index.html#arena">Арена</a>
+            <a href="index.html#heroes">Герои</a>
+        </nav>
+        <a class="login-btn" href="room.html"
+           style="text-decoration:none">Комната</a>
+    </header>
+
+    <main class="battle-page">
+
+        <div class="battle-heading">
+            <p class="round-label" id="roundLabel">РАУНД 1</p>
+            <h1>АРЕНА ДУЭЛИ</h1>
+            <p style="font-size:12px;opacity:.65">
+                Выбери действие и победи соперника
+            </p>
+        </div>
+
+        <section class="battlefield" id="battlefield">
+
+            <div class="battle-ground"></div>
+
+            <div class="battle-hud">
+                <div class="fighter-hud">
+                    <div class="fighter-name">Adislave</div>
+                    <div class="hp-numbers" id="hpText1">200 / 200 HP</div>
+                    <div class="hp-track">
+                        <div class="hp-fill" id="hpBar1"></div>
+                    </div>
+                </div>
+
+                <div class="fighter-hud right">
+                    <div class="fighter-name">Ludomane</div>
+                    <div class="hp-numbers" id="hpText2">200 / 200 HP</div>
+                    <div class="hp-track">
+                        <div class="hp-fill" id="hpBar2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fighter left" id="fighter1">
+                <img src="assets/hero-top.png" alt="Adislave">
+            </div>
+
+            <div class="battle-vs">VS</div>
+
+            <div class="fighter right" id="fighter2">
+                <img src="assets/hero-bottom.png" alt="Ludomane">
+            </div>
+
+            <!-- Путь к твоему изображению снаряда -->
+            <img class="projectile"
+                 id="projectile"
+                 if (attacker === "left") {
+    projectile.src = "assets/adislave-projectile.png";
+} else {
+    projectile.src = "assets/ludomane-projectile.png";
+}
+                 alt="Снаряд">
+
+            <div class="battle-message" id="battleMessage">
+                Adislave, выбери действие!
+            </div>
+        </section>
+
+        <section class="battle-panel">
+            <div class="turn-heading">
+                <h2>ВЫБОР ДЕЙСТВИЯ</h2>
+                <span class="turn-badge" id="turnBadge">ХОД: ADISLAVE</span>
+            </div>
+
+            <div class="action-grid" id="actionGrid">
+
+                <button class="action-card" data-action="normal">
+                    <strong>⚔ Обычная атака</strong>
+                    <p>Нанести противнику стандартный урон.</p>
+                    <span class="action-damage">20 УРОНА</span>
+                </button>
+
+                <button class="action-card" data-action="double">
+                    <strong>🔥 Удар x2</strong>
+                    <p>Мощный удар. Следующий свой ход придётся пропустить.</p>
+                    <span class="action-damage">40 УРОНА</span>
+                </button>
+
+                <button class="action-card" data-action="special">
+                    <strong id="specialTitle">🛡 backDamage</strong>
+                    <p id="specialDescription">
+                        Получить половину урона и вернуть полный урон.
+                    </p>
+                    <span class="action-heal" id="specialEffect">
+                        Защита и отражение
+                    </span>
+                    <span class="action-limit" id="specialLimit">
+                        Осталось: 2
+                    </span>
+                </button>
+
+            </div>
+
+            <div class="battle-bottom">
+                <div class="battle-status" id="battleStatus">
+                    Выбирай способность.
+                </div>
+                <button class="reset-btn" id="resetButton">
+                    ЗАНОВО
+                </button>
+            </div>
+        </section>
+
+        <a class="back-home" href="index.html">
+            ← Вернуться на главную
+        </a>
+    </main>
+
+    <script>
+        const initialState = () => ({
+            players: [
+                {
+                    name: "Adislave",
+                    hp: 200,
+                    maxHp: 200,
+                    backUses: 2,
+                    guarding: false,
+                    skip: false
+                },
+                {
+                    name: "Ludomane",
+                    hp: 200,
+                    maxHp: 200,
+                    backUses: 0,
+                    guarding: false,
+                    skip: false
+                }
+            ],
+            current: 0,
+            round: 1,
+            over: false,
+            busy: false,
+            log: "Выбирай способность."
+        });
+
+        let state = initialState();
+
+        const $ = id => document.getElementById(id);
+
+        function render() {
+            state.players.forEach((player, i) => {
+                const n = i + 1;
+                $("hpText" + n).textContent =
+                    `${player.hp} / ${player.maxHp} HP`;
+
+                const bar = $("hpBar" + n);
+                bar.style.width = (player.hp / player.maxHp * 100) + "%";
+                bar.style.background =
+                    player.hp > 50 ? "#45e58a" :
+                    player.hp > 25 ? "#ffd166" : "#ff4141";
+            });
+
+            $("roundLabel").textContent = "РАУНД " + state.round;
+
+            const current = state.players[state.current];
+            $("turnBadge").textContent =
+                "ХОД: " + current.name.toUpperCase();
+
+            $("battleMessage").textContent = state.log;
+            $("battleStatus").textContent = state.log;
+
+            const isAdislave = state.current === 0;
+
+            $("specialTitle").textContent = isAdislave
+                ? "🛡 backDamage"
+                : "🎲 luckOrSuck";
+
+            $("specialDescription").textContent = isAdislave
+                ? "Следующая входящая атака наносит половину урона и отражается."
+                : "50% шанс получить +20 HP или потерять 20 HP.";
+
+            $("specialEffect").textContent = isAdislave
+                ? "50% урона + отражение"
+                : "50% +20 HP / 50% −20 HP";
+
+            $("specialLimit").textContent = isAdislave
+                ? "Осталось применений: " + current.backUses
+                : "Шанс: 50 на 50";
+
+            document.querySelectorAll(".action-card").forEach(button => {
+                button.disabled = state.over || state.busy;
+                if (button.dataset.action === "special" &&
+                    isAdislave && current.backUses <= 0) {
+                    button.disabled = true;
+                }
+            });
+
+            $("resetButton").disabled = state.busy;
+            $("startButton")?.remove();
+        }
+
+        function endCheck() {
+            const dead = state.players.find(p => p.hp <= 0);
+            if (!dead) return false;
+
+            state.over = true;
+            const winner = state.players.find(p => p.hp > 0);
+            state.log = winner
+                ? winner.name + " победил!"
+                : "Ничья!";
+
+            document.querySelectorAll(".action-card")
+                .forEach(button => button.disabled = true);
+
+            render();
+            return true;
+        }
+
+        function animateProjectile(fromIndex, callback) {
+            const field = $("battlefield");
+            const projectile = $("projectile");
+            const from = $("fighter" + (fromIndex + 1));
+            const to = $("fighter" + (fromIndex === 0 ? 2 : 1));
+
+            const fieldRect = field.getBoundingClientRect();
+            const fromRect = from.getBoundingClientRect();
+            const toRect = to.getBoundingClientRect();
+
+            const startX = fromRect.left + fromRect.width / 2
+                - fieldRect.left - 25;
+            const startY = fromRect.top + fromRect.height * .35
+                - fieldRect.top - 25;
+            const endX = toRect.left + toRect.width / 2
+                - fieldRect.left - 25;
+            const endY = toRect.top + toRect.height * .35
+                - fieldRect.top - 25;
+
+            projectile.style.setProperty("--start-x", startX + "px");
+            projectile.style.setProperty("--start-y", startY + "px");
+            projectile.style.setProperty("--end-x", endX + "px");
+            projectile.style.setProperty("--end-y", endY + "px");
+
+            projectile.classList.remove("fly");
+            projectile.style.display = "block";
+            void projectile.offsetWidth;
+            projectile.classList.add("fly");
+
+            setTimeout(() => {
+                projectile.classList.remove("fly");
+                projectile.style.display = "none";
+                to.classList.add("hit");
+                setTimeout(() => to.classList.remove("hit"), 180);
+                callback();
+            }, 430);
+        }
+
+        function attack(action) {
+            if (state.over || state.busy) return;
+
+            const attackerIndex = state.current;
+            const defenderIndex = attackerIndex === 0 ? 1 : 0;
+            const attacker = state.players[attackerIndex];
+            const defender = state.players[defenderIndex];
+
+            if (attacker.skip) {
+                attacker.skip = false;
+                state.log = attacker.name + " пропускает ход после удара x2.";
+                nextTurn();
+                return;
+            }
+
+            if (action === "special" && attackerIndex === 0 &&
+                attacker.backUses <= 0) return;
+
+            state.busy = true;
+
+            if (action === "special" && attackerIndex === 0) {
+                attacker.backUses--;
+                attacker.guarding = true;
+                state.log = attacker.name +
+                    " активирует backDamage! Следующая атака будет отражена.";
+                state.busy = false;
+                nextTurn();
+                return;
+            }
+
+            if (action === "special" && attackerIndex === 1) {
+                if (Math.random() < 0.5) {
+                    attacker.hp = Math.min(
+                        attacker.maxHp, attacker.hp + 20
+                    );
+                    state.log = "Удача! Ludomane восстанавливает 20 HP.";
+                } else {
+                    attacker.hp = Math.max(0, attacker.hp - 20);
+                    state.log = "Не повезло! Ludomane теряет 20 HP.";
+                }
+
+                state.busy = false;
+                render();
+
+                if (!endCheck()) nextTurn();
+                return;
+            }
+
+            const damage = action === "double" ? 40 : 20;
+            const fighter = $("fighter" + (attackerIndex + 1));
+
+            fighter.classList.add(
+                attackerIndex === 0 ? "attack-left" : "attack-right"
+            );
+
+            animateProjectile(attackerIndex, () => {
+                fighter.classList.remove("attack-left", "attack-right");
+
+                if (defender.guarding) {
+                    defender.guarding = false;
+                    defender.hp = Math.max(0,
+                        defender.hp - Math.floor(damage / 2));
+
+                    attacker.hp = Math.max(0, attacker.hp - damage);
+
+                    state.log = defender.name +
+                        " отражает атаку! Получает половину урона, " +
+                        "атакующий получает " + damage + " урона.";
+                } else {
+                    defender.hp = Math.max(0, defender.hp - damage);
+                    state.log = attacker.name + " наносит " +
+                        damage + " урона!";
+                }
+
+                if (action === "double") {
+                    attacker.skip = true;
+                }
+
+                state.busy = false;
+                render();
+
+                if (!endCheck()) nextTurn();
+            });
+        }
+
+        function nextTurn() {
+            if (state.over) return;
+
+            state.current = state.current === 0 ? 1 : 0;
+
+            if (state.current === 0) {
+                state.round++;
+            }
+
+            const player = state.players[state.current];
+
+            if (player.skip) {
+                state.log = player.name +
+                    " пропускает ход после удара x2.";
+                render();
+
+                setTimeout(() => {
+                    player.skip = false;
+                    nextTurn();
+                }, 700);
+
+                return;
+            }
+
+            render();
+        }
+
+        document.querySelectorAll(".action-card").forEach(button => {
+            button.addEventListener("click", () => {
+                attack(button.dataset.action);
+            });
+        });
+
+        $("resetButton").addEventListener("click", () => {
+            state = initialState();
+            $("projectile").classList.remove("fly");
+            $("projectile").style.display = "none";
+            render();
+        });
+
+        render();
+    </script>
+</body>
+</html>

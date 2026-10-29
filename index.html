@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUEL RPG — Арена</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <header class="header">
+        <a class="logo" href="#">DUEL<span>RPG</span></a>
+
+        <nav>
+            <a href="#arena">Арена</a>
+            <a href="#heroes">Герои</a>
+            <a href="#about">О проекте</a>
+        </nav>
+
+        <button class="login-btn">Войти</button>
+    </header>
+
+    <main class="main" id="arena">
+
+        <div class="intro">
+            <p class="subtitle">ОНЛАЙН • PvP • ПОШАГОВЫЕ БОИ</p>
+            <h1>ТВОЯ ЛЕГЕНДА<br>НАЧИНАЕТСЯ ЗДЕСЬ</h1>
+            <p class="description">
+                Выбирай героя. Продумывай тактику.
+                Побеждай в дуэлях против игроков.
+            </p>
+        </div>
+
+        <section class="arena" id="heroes">
+
+            <div class="hero hero-top">
+                <img src="assets/hero-top.png" alt="Adislave">
+                <div class="hero-info">
+                    <span class="hero-label">ИГРОК 01</span>
+                    <h2>Adislave</h2>
+                    <p>Двойной подбородок</p>
+                </div>
+            </div>
+
+            <div class="versus">VS</div>
+
+            <div class="hero hero-bottom">
+                <img src="assets/hero-bottom.png" alt="Ludomane">
+                <div class="hero-info">
+                    <span class="hero-label">ИГРОК 02</span>
+                    <h2>Ludomane</h2>
+                    <p>Удачник</p>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="abilities">
+            <h2>АРСЕНАЛ ГЕРОЕВ</h2>
+            <p class="section-description">
+                Выбирай способность и решай исход поединка.
+            </p>
+
+            <div class="ability-columns">
+
+                <div class="ability-group">
+                    <h3>Adislave</h3>
+                    <p class="ability-subtitle">Двойной подбородок</p>
+
+                    <article class="ability-card">
+                        <span class="ability-number">01</span>
+                        <h4>Обычная атака</h4>
+                        <p>Наносит противнику стандартный урон.</p>
+                        <span class="damage">20 урона</span>
+                    </article>
+
+                    <article class="ability-card">
+                        <span class="ability-number">02</span>
+                        <h4>Удар x2</h4>
+                        <p>
+                            Мощная атака, наносящая двойной урон.
+                            После применения персонаж пропускает
+                            следующий раунд.
+                        </p>
+                        <span class="damage">40 урона</span>
+                        <span class="penalty">Пропуск следующего раунда</span>
+                    </article>
+
+                    <article class="ability-card">
+                        <span class="ability-number">03</span>
+                        <h4>backDamage</h4>
+                        <p>
+                            Персонаж принимает только половину
+                            входящего урона и возвращает противнику
+                            полный объём исходного урона.
+                        </p>
+                        <span class="damage">50% входящего урона</span>
+                        <span class="ability-limit">2 применения за игру</span>
+                    </article>
+                </div>
+
+                <div class="ability-group">
+                    <h3>Ludomane</h3>
+                    <p class="ability-subtitle">Удачник</p>
+
+                    <article class="ability-card">
+                        <span class="ability-number">01</span>
+                        <h4>Обычная атака</h4>
+                        <p>Наносит противнику стандартный урон.</p>
+                        <span class="damage">20 урона</span>
+                    </article>
+
+                    <article class="ability-card">
+                        <span class="ability-number">02</span>
+                        <h4>Удар x2</h4>
+                        <p>
+                            Мощная атака с двойным уроном.
+                            После применения персонаж пропускает
+                            следующий раунд.
+                        </p>
+                        <span class="damage">40 урона</span>
+                        <span class="penalty">Пропуск следующего раунда</span>
+                    </article>
+
+                    <article class="ability-card">
+                        <span class="ability-number">03</span>
+                        <h4>luckOrSuck</h4>
+                        <p>
+                            Испытай удачу! С вероятностью 50%
+                            персонаж восстанавливает 20 HP.
+                            В противном случае теряет 20 HP.
+                        </p>
+                        <span class="healing">50% — +20 HP</span>
+                        <span class="damage">50% — −20 HP</span>
+                    </article>
+                </div>
+
+            </div>
+        </section>
+
+        
+<div class="actions">
+    
+<button class="play-btn" onclick="window.location.href='room.html'">
+    НАЧАТЬ БОЙ
+</button>
+
+
+    <p>Собери команду. Докажи своё превосходство.</p>
+</div>
+
+
+    </main>
+
+    <footer id="about">
+        DUEL RPG © 2026 — БИТВА НАЧИНАЕТСЯ
+    </footer>
+
+</body>
+</html>

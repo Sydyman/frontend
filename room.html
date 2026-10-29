@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUEL RPG — Комната</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .room-page {
+            width: min(760px, 92%);
+            margin: 45px auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .room-heading {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .room-heading h1 {
+            font-size: clamp(26px, 5vw, 38px);
+            margin: 10px 0;
+        }
+
+        .room-heading p {
+            font-size: 13px;
+            opacity: .7;
+        }
+
+        .room-panel {
+            background: rgba(15, 15, 23, .82);
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .room-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            opacity: .65;
+            margin-bottom: 12px;
+        }
+
+        .room-code {
+            font-size: clamp(28px, 7vw, 42px);
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-align: center;
+            margin: 12px 0 18px;
+        }
+
+        .room-code span {
+            color: #ff4141;
+        }
+
+        .invite-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .invite-row input {
+            width: 100%;
+            min-width: 0;
+            padding: 12px;
+            color: white;
+            background: #20202a;
+            border: 1px solid #393943;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .secondary-btn {
+            padding: 11px 15px;
+            border: 1px solid #ff4141;
+            border-radius: 6px;
+            background: transparent;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .secondary-btn:hover {
+            background: #ff4141;
+        }
+
+        .players {
+            display: grid;
+            grid-template-columns: 1fr 44px 1fr;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-card {
+            min-width: 0;
+            text-align: center;
+            padding: 16px 10px;
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 9px;
+        }
+
+        .player-card img {
+            width: 100%;
+            max-width: 120px;
+            height: 115px;
+            object-fit: contain;
+        }
+
+        .player-card h3 {
+            font-size: 17px;
+            margin: 8px 0 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .player-card p {
+            font-size: 12px;
+            opacity: .65;
+            margin: 5px 0;
+        }
+
+        .player-status {
+            display: inline-block;
+            font-size: 10px;
+            color: #ffd166;
+            background: rgba(255,209,102,.1);
+            border-radius: 4px;
+            padding: 5px 7px;
+            margin-top: 7px;
+        }
+
+        .player-status.ready {
+            color: #65ef9b;
+            background: rgba(50,220,120,.1);
+        }
+
+        .vs-mark {
+            text-align: center;
+            color: #ff4141;
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        .room-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .room-actions button {
+            width: 100%;
+        }
+
+        .room-note {
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.6;
+            opacity: .65;
+            margin: 14px 0 0;
+        }
+
+        .room-message {
+            min-height: 18px;
+            text-align: center;
+            font-size: 12px;
+            color: #65ef9b;
+            margin-top: 10px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin: 24px 0;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            opacity: .7;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 480px) {
+            .room-page {
+                margin: 25px auto;
+            }
+
+            .room-panel {
+                padding: 15px;
+            }
+
+            .players {
+                grid-template-columns: minmax(0, 1fr) 25px minmax(0, 1fr);
+                gap: 5px;
+            }
+
+            .player-card {
+                padding: 12px 5px;
+            }
+
+            .player-card img {
+                height: 85px;
+            }
+
+            .player-card h3 {
+                font-size: 14px;
+            }
+
+            .invite-row {
+                flex-direction: column;
+            }
+
+            .room-code {
+                letter-spacing: 3px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <header class="header">
+        <a class="logo" href="index.html">DUEL<span>RPG</span></a>
+
+        <nav>
+            <a href="index.html#arena">Арена</a>
+            <a href="index.html#heroes">Герои</a>
+            <a href="index.html#about">О проекте</a>
+        </nav>
+
+        <a href="index.html" class="login-btn"
+           style="text-decoration:none">Назад</a>
+    </header>
+
+    <main class="room-page">
+        <div class="room-heading">
+            <p class="subtitle">ОНЛАЙН • PvP • ПОШАГОВЫЕ БОИ</p>
+            <h1>КОМНАТА ДУЭЛИ</h1>
+            <p>Пригласи соперника и приготовься к битве.</p>
+        </div>
+
+        <section class="room-panel">
+            <div class="room-label">ТВОЯ КОМНАТА</div>
+
+            <div class="room-code">
+                <span id="codePart1">DUEL</span>-<span id="codePart2">----</span>
+            </div>
+
+            <div class="room-label">ССЫЛКА-ПРИГЛАШЕНИЕ</div>
+
+            <div class="invite-row">
+                <input id="inviteLink" type="text" readonly>
+                <button class="secondary-btn" id="copyButton">
+                    КОПИРОВАТЬ
+                </button>
+            </div>
+
+            <p class="room-note">
+                Отправь ссылку другу в Telegram, WhatsApp или Discord.
+                Для реального подключения игроков понадобится сервер.
+            </p>
+
+            <div class="room-message" id="copyMessage"></div>
+        </section>
+
+        <section class="room-panel">
+            <div class="room-label">УЧАСТНИКИ • 1 ИЗ 2</div>
+
+            <div class="players">
+                <div class="player-card">
+                    <img src="assets/hero-top.png" alt="Adislave">
+                    <h3>Adislave</h3>
+                    <p>Двойной подбородок</p>
+                    <span class="player-status ready" id="hostStatus">
+                        СОЗДАТЕЛЬ
+                    </span>
+                </div>
+
+                <div class="vs-mark">VS</div>
+
+                <div class="player-card">
+                    <img src="assets/hero-bottom.png" alt="Соперник">
+                    <h3 id="guestName">???</h3>
+                    <p>Ожидание игрока</p>
+                    <span class="player-status" id="guestStatus">
+                        НЕ ПОДКЛЮЧЁН
+                    </span>
+                </div>
+            </div>
+
+            <div class="room-actions">
+                <button class="play-btn" id="readyButton">
+                    Я ГОТОВ
+                </button>
+
+                <button class="play-btn" id="startButton"
+                        disabled style="opacity:.45; cursor:not-allowed">
+                    НАЧАТЬ БОЙ
+                </button>
+            </div>
+
+            <p class="room-note" id="roomStatus">
+                Ожидаем соперника. Отправь ему приглашение!
+            </p>
+        </section>
+
+        <a href="index.html" class="back-link">
+            ← Вернуться на главную
+        </a>
+    </main>
+
+    <footer>
+        DUEL RPG © 2026 — БИТВА НАЧИНАЕТСЯ
+    </footer>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        let roomCode = params.get("room");
+
+        if (!roomCode) {
+            roomCode = Math.random().toString(36)
+                .substring(2, 6).toUpperCase();
+        }
+
+        document.getElementById("codePart2").textContent = roomCode;
+
+        const inviteLink = document.getElementById("inviteLink");
+        inviteLink.value =
+            window.location.origin +
+            window.location.pathname +
+            "?room=" + encodeURIComponent(roomCode);
+
+        document.getElementById("copyButton").addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(inviteLink.value);
+                document.getElementById("copyMessage").textContent =
+                    "Ссылка скопирована!";
+            } catch {
+                inviteLink.select();
+                document.execCommand("copy");
+                document.getElementById("copyMessage").textContent =
+                    "Попробуй скопировать ссылку вручную.";
+            }
+        });
+
+        let isReady = false;
+
+        document.getElementById("readyButton").addEventListener("click", () => {
+            isReady = !isReady;
+
+            const button = document.getElementById("readyButton");
+            const status = document.getElementById("hostStatus");
+
+            button.textContent = isReady ? "НЕ ГОТОВ" : "Я ГОТОВ";
+            status.textContent = isReady ? "ГОТОВ" : "СОЗДАТЕЛЬ";
+            status.classList.toggle("ready", isReady);
+
+            document.getElementById("roomStatus").textContent = isReady
+                ? "Ты готов. Теперь нужен второй игрок."
+                : "Ты отменил готовность.";
+        });
+
+        document.getElementById("startButton").addEventListener("click", () => {
+            alert("Игровой сервер подключим позже!");
+        });
+    </script>
+</body>
+</html>
